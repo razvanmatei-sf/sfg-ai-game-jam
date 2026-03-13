@@ -20,7 +20,7 @@ source /workspace/runpod-slim/ComfyUI/.venv-cu128/bin/activate
 cd /workspace/runpod-slim/ComfyUI
 
 # Build command args
-ARGS="--listen 0.0.0.0 --use-sage-attention"
+ARGS="--listen 0.0.0.0"
 if [ -n "$COMFY_OUTPUT_DIR" ]; then
     mkdir -p "$COMFY_OUTPUT_DIR"
     ARGS="$ARGS --output-directory \"$COMFY_OUTPUT_DIR\""
