@@ -2217,43 +2217,24 @@ def home():
     if not current_artist:
         return redirect(url_for("login"))
 
-    # Get filter type from query params
-    active_filter = request.args.get("type", "image")
-    filter_names = {
-        "use-cases": "Use Cases",
-        "image": "Image",
-        "video": "Video",
-        "audio": "Audio",
-        "3d-model": "3D Model",
-        "llm": "LLM",
-    }
-    active_filter_name = filter_names.get(active_filter, "Image")
-
-    # Load templates and filter by category
+    # Load templates (for admin editing)
     all_templates = load_templates()
-    if active_filter and active_filter != "use-cases":
-        templates = [
-            t
-            for t in all_templates
-            if t.get("category") == active_filter and t.get("enabled", True)
-        ]
-    else:
-        templates = [t for t in all_templates if t.get("enabled", True)]
-
-    # Sort by order
+    templates = [t for t in all_templates if t.get("enabled", True)]
     templates.sort(key=lambda x: x.get("order", 999))
+
+    # Get recent output images for this user
+    recent_images = get_recent_output_images(current_artist, limit=5)
 
     return render_template(
         "home.html",
         current_user=current_artist,
         is_admin=is_admin(current_artist),
         active_page="home",
-        active_filter=active_filter,
-        active_filter_name=active_filter_name,
         page_title="Home",
         runpod_id=get_runpod_id(),
         hero_banner_url=get_hero_banner_url(),
         templates=templates,
+        recent_images=recent_images,
     )
 
 
@@ -3151,6 +3132,41 @@ def api_quickgen_upload_image():
 
 WORKSPACE_ROOT = "/workspace"
 
+IMAGE_EXTENSIONS = {".png", ".jpg", ".jpeg", ".gif", ".webp"}
+
+
+def get_recent_output_images(user, limit=5):
+    """Get the most recently modified images from a user's output folder."""
+    output_dir = os.path.join(WORKSPACE_ROOT, "ComfyUI", "output", user)
+    if not os.path.isdir(output_dir):
+        return []
+
+    images = []
+    for root, dirs, files in os.walk(output_dir):
+        # Skip hidden directories
+        dirs[:] = [d for d in dirs if not d.startswith(".")]
+        for name in files:
+            if name.startswith("."):
+                continue
+            ext = os.path.splitext(name)[1].lower()
+            if ext in IMAGE_EXTENSIONS:
+                full_path = os.path.join(root, name)
+                rel_path = os.path.relpath(full_path, WORKSPACE_ROOT)
+                stat = os.stat(full_path)
+                images.append(
+                    {
+                        "name": name,
+                        "path": rel_path,
+                        "modified": stat.st_mtime,
+                        "modified_formatted": datetime.fromtimestamp(
+                            stat.st_mtime
+                        ).strftime("%Y-%m-%d %H:%M"),
+                    }
+                )
+
+    images.sort(key=lambda x: x["modified"], reverse=True)
+    return images[:limit]
+
 
 def get_user_allowed_roots(user):
     """Get the allowed root paths for a user's assets.
@@ -3234,6 +3250,8 @@ def assets():
         # Admins see all top-level folders in /workspace
         try:
             for name in os.listdir(WORKSPACE_ROOT):
+                if name.startswith("."):
+                    continue
                 item_path = os.path.join(WORKSPACE_ROOT, name)
                 if os.path.isdir(item_path):
                     folders.append(
@@ -3315,6 +3333,8 @@ def assets_browse(subpath):
 
     try:
         for name in os.listdir(full_path):
+            if name.startswith("."):
+                continue
             item_path = os.path.join(full_path, name)
 
             if os.path.isdir(item_path):
@@ -3635,6 +3655,8 @@ def assets_api_list(subpath=""):
             # Admins see all top-level folders in /workspace
             try:
                 for name in os.listdir(WORKSPACE_ROOT):
+                    if name.startswith("."):
+                        continue
                     item_path = os.path.join(WORKSPACE_ROOT, name)
                     if os.path.isdir(item_path):
                         folders.append(
@@ -3683,6 +3705,8 @@ def assets_api_list(subpath=""):
 
     try:
         for name in os.listdir(full_path):
+            if name.startswith("."):
+                continue
             item_path = os.path.join(full_path, name)
 
             if os.path.isdir(item_path):

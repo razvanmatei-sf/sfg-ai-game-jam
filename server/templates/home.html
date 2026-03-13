@@ -15,139 +15,15 @@
     {% endif %}
 </div>
 
-<!-- Search and Filters -->
-<div class="template-filters">
-    <div class="template-filters-left">
-        <div class="search-box">
-            <svg
-                class="search-icon"
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-            >
-                <circle cx="11" cy="11" r="8" />
-                <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            </svg>
-            <input
-                type="text"
-                id="template-search"
-                class="search-input"
-                placeholder="Search..."
-            />
-            <button type="button" class="search-clear" id="search-clear">
-                <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                >
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                </svg>
-            </button>
-        </div>
-
-        <div class="filter-dropdowns">
-            <div class="filter-dropdown">
-                <button type="button" class="filter-btn">
-                    Model Filter
-                    <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                </button>
-            </div>
-
-            <div class="filter-dropdown">
-                <button type="button" class="filter-btn">
-                    Use Case
-                    <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                </button>
-            </div>
-
-            <div class="filter-dropdown">
-                <button type="button" class="filter-btn">
-                    Runs on
-                    <svg
-                        width="12"
-                        height="12"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        stroke-width="2"
-                    >
-                        <polyline points="6 9 12 15 18 9" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div class="template-filters-right">
-        <div class="filter-dropdown">
-            <button type="button" class="filter-btn sort-btn">
-                <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                >
-                    <line x1="4" y1="6" x2="11" y2="6" />
-                    <line x1="4" y1="12" x2="16" y2="12" />
-                    <line x1="4" y1="18" x2="20" y2="18" />
-                </svg>
-                Newest
-                <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                >
-                    <polyline points="6 9 12 15 18 9" />
-                </svg>
-            </button>
-        </div>
-    </div>
-</div>
-
-<!-- Template Gallery -->
+<!-- Workflow Templates -->
 <section class="template-section">
-    <h2 class="template-section-title">
-        {{ active_filter_name | default('Image') }}
-    </h2>
+    <h2 class="template-section-title">Workflows</h2>
 
     <div class="template-grid">
         {% for template in templates %}
-        <!-- Template Card: {{ template.title }} -->
         <div
             class="template-card"
             data-id="{{ template.id }}"
-            data-type="{{ template.category }}"
-            data-has-quickgen="{{ 'true' if template.exposed_nodes else 'false' }}"
             onclick="openTemplate('{{ template.id }}', '{{ template.workflow_file }}', {{ 'true' if template.exposed_nodes else 'false' }})"
         >
             {% if is_admin %}
@@ -172,23 +48,6 @@
                     />
                 </svg>
             </button>
-            {% endif %} {% if template.exposed_nodes %}
-            <div
-                class="quickgen-badge"
-                title="QuickGen enabled - simplified generation"
-            >
-                <svg
-                    width="12"
-                    height="12"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                >
-                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
-                </svg>
-                QuickGen
-            </div>
             {% endif %}
             <div class="template-card-image">
                 <div class="template-image-slider">
@@ -263,7 +122,6 @@
             </div>
         </div>
         {% endfor %} {% if is_admin %}
-        <!-- Add New Template Card -->
         <div
             class="template-card template-card-add"
             onclick="openEditModal(null)"
@@ -285,6 +143,44 @@
         </div>
         {% endif %}
     </div>
+</section>
+
+<!-- Recent Outputs -->
+<section class="template-section">
+    <div class="recent-outputs-header">
+        <h2 class="template-section-title">Recent Outputs</h2>
+        <a href="{{ url_for('assets') }}" class="recent-outputs-link">
+            View all
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="9 18 15 12 9 6" />
+            </svg>
+        </a>
+    </div>
+
+    {% if recent_images %}
+    <div class="recent-outputs-grid">
+        {% for img in recent_images %}
+        <a href="{{ url_for('assets_browse', subpath='/'.join(img.path.split('/')[:-1])) }}" class="recent-output-card">
+            <div class="recent-output-image">
+                <img src="/assets/preview/{{ img.path }}" alt="{{ img.name }}" loading="lazy" />
+            </div>
+            <div class="recent-output-info">
+                <span class="recent-output-name" title="{{ img.name }}">{{ img.name }}</span>
+                <span class="recent-output-date">{{ img.modified_formatted }}</span>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="recent-outputs-empty">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
+        </svg>
+        <p>No outputs yet. Start generating with ComfyUI!</p>
+    </div>
+    {% endif %}
 </section>
 
 {% if is_admin %}
