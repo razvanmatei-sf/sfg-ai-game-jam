@@ -209,6 +209,39 @@ a:hover {
     box-shadow: 0 0 0 1px var(--accent-primary);
 }
 
+.login-input {
+    width: 100%;
+    padding: 12px var(--space-4);
+    background: var(--bg-tertiary);
+    border: 1px solid var(--border-primary);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    margin-bottom: var(--space-4);
+    transition: border-color var(--transition-fast);
+    box-sizing: border-box;
+}
+
+.login-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 1px var(--accent-primary);
+}
+
+.login-input::placeholder {
+    color: var(--text-tertiary);
+}
+
+.login-error {
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    color: #ef4444;
+    padding: 10px var(--space-4);
+    border-radius: var(--radius-md);
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-4);
+}
+
 .login-btn {
     width: 100%;
     padding: 12px var(--space-6);

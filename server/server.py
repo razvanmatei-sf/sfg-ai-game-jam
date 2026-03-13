@@ -68,6 +68,21 @@ from user_management import (
 # Paths for user management
 USERS_JSON_PATH = "/workspace/users.json"
 USERS_OUTPUT_DIR = "/workspace/ComfyUI/output"
+PASSWORDS_FILE = "/workspace/.passwords.json"
+
+
+def load_passwords():
+    """Load passwords from hidden file on network volume."""
+    try:
+        if os.path.exists(PASSWORDS_FILE):
+            with open(PASSWORDS_FILE, "r") as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"Warning: Could not load passwords from {PASSWORDS_FILE}: {e}")
+    return {}
+
+
+PASSWORDS = load_passwords()
 
 # Initialize users and admins from JSON/folders
 USERS_DATA, ADMINS = initialize_users(USERS_JSON_PATH, USERS_OUTPUT_DIR)
@@ -4207,11 +4222,24 @@ def set_artist():
     # Handle both form submission and JSON
     if request.is_json:
         data = request.get_json()
-        current_artist = data.get("artist", "")
+        artist = data.get("artist", "")
+        password = data.get("password", "")
         autostart_comfyui = data.get("autostart_comfyui", False)
     else:
-        current_artist = request.form.get("artist", "")
+        artist = request.form.get("artist", "")
+        password = request.form.get("password", "")
         autostart_comfyui = request.form.get("autostart_comfyui") == "on"
+
+    # Validate password if passwords are configured
+    if PASSWORDS:
+        expected = PASSWORDS.get(artist, "")
+        if not expected or password != expected:
+            if request.is_json:
+                return jsonify({"success": False, "error": "Invalid password"}), 401
+            teams = get_all_users()
+            return render_template("login.html", teams=teams, error="Invalid password", selected_team=artist)
+
+    current_artist = artist
 
     # Reset admin mode if not an admin
     if not is_admin(current_artist):

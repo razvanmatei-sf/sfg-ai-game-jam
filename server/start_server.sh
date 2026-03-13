@@ -26,6 +26,9 @@ find "$REPO_DIR/setup" -name "*.sh" -exec chmod +x {} \; 2>/dev/null
 # Symlink so server.py paths (/workspace/ComfyUI) resolve to the 5090 location
 ln -sfn /workspace/runpod-slim/ComfyUI /workspace/ComfyUI 2>/dev/null
 
+# Initialize passwords file on network volume (creates only if missing)
+bash "$REPO_DIR/setup/init_passwords.sh"
+
 # Export repo path for the Flask server
 export REPO_DIR="$REPO_DIR"
 

@@ -23,15 +23,27 @@
                 <h1 class="login-title">SF AI Game Jam</h1>
                 <p class="login-subtitle">Select your team to continue</p>
 
+                {% if error %}
+                <div class="login-error">{{ error }}</div>
+                {% endif %}
+
                 <form action="{{ url_for('set_artist') }}" method="POST">
                     <select name="artist" class="login-select" required>
-                        <option value="" disabled selected>
+                        <option value="" disabled {% if not selected_team %}selected{% endif %}>
                             Choose your team...
                         </option>
                         {% for team in teams %}
-                        <option value="{{ team }}">{{ team }}</option>
+                        <option value="{{ team }}" {% if selected_team == team %}selected{% endif %}>{{ team }}</option>
                         {% endfor %}
                     </select>
+
+                    <input
+                        type="password"
+                        name="password"
+                        class="login-input"
+                        placeholder="Enter team password"
+                        required
+                    />
 
                     <label class="login-checkbox">
                         <input
