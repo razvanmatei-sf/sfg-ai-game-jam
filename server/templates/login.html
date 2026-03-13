@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>SF AI Game Jam - Login</title>
+        <link
+            rel="stylesheet"
+            href="{{ url_for('static', filename='css/style.css') }}"
+        />
+    </head>
+    <body>
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-logo">
+                    <img
+                        src="{{ url_for('static', filename='images/stillfront.png') }}"
+                        alt="Stillfront"
+                        style="width: 64px; height: 64px"
+                        onerror="this.style.display='none';"
+                    />
+                </div>
+                <h1 class="login-title">SF AI Game Jam</h1>
+                <p class="login-subtitle">Select your team to continue</p>
+
+                <form action="{{ url_for('set_artist') }}" method="POST">
+                    <select name="artist" class="login-select" required>
+                        <option value="" disabled selected>
+                            Choose your team...
+                        </option>
+                        {% for team in teams %}
+                        <option value="{{ team }}">{{ team }}</option>
+                        {% endfor %}
+                    </select>
+
+                    <label class="login-checkbox">
+                        <input
+                            type="checkbox"
+                            name="autostart_comfyui"
+                            id="autostart_comfyui"
+                        />
+                        <span>Auto-start ComfyUI on login</span>
+                    </label>
+
+                    <button type="submit" class="login-btn">Start</button>
+                </form>
+
+                <script>
+                    // Restore checkbox state from localStorage
+                    const checkbox =
+                        document.getElementById("autostart_comfyui");
+                    if (localStorage.getItem("autostart_comfyui") === "true") {
+                        checkbox.checked = true;
+                    }
+                    // Save checkbox state on change
+                    checkbox.addEventListener("change", function () {
+                        localStorage.setItem("autostart_comfyui", this.checked);
+                    });
+                </script>
+            </div>
+        </div>
+    </body>
+</html>

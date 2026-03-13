@@ -1,0 +1,1307 @@
+{% extends "base.html" %} {% block title %}Home - SF AI Workbench{% endblock %}
+{% block content %}
+<!-- Hero Banner -->
+<div class="hero-banner">
+    {% if hero_banner_url %}
+    <img
+        src="{{ hero_banner_url }}"
+        alt="Hero Banner"
+        class="hero-banner-img"
+    />
+    {% else %}
+    <div class="hero-banner-placeholder">
+        <span>Upload a studio banner from Admin &gt; Studio</span>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Search and Filters -->
+<div class="template-filters">
+    <div class="template-filters-left">
+        <div class="search-box">
+            <svg
+                class="search-icon"
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+            </svg>
+            <input
+                type="text"
+                id="template-search"
+                class="search-input"
+                placeholder="Search..."
+            />
+            <button type="button" class="search-clear" id="search-clear">
+                <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                >
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+        </div>
+
+        <div class="filter-dropdowns">
+            <div class="filter-dropdown">
+                <button type="button" class="filter-btn">
+                    Model Filter
+                    <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="filter-dropdown">
+                <button type="button" class="filter-btn">
+                    Use Case
+                    <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                </button>
+            </div>
+
+            <div class="filter-dropdown">
+                <button type="button" class="filter-btn">
+                    Runs on
+                    <svg
+                        width="12"
+                        height="12"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="template-filters-right">
+        <div class="filter-dropdown">
+            <button type="button" class="filter-btn sort-btn">
+                <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                >
+                    <line x1="4" y1="6" x2="11" y2="6" />
+                    <line x1="4" y1="12" x2="16" y2="12" />
+                    <line x1="4" y1="18" x2="20" y2="18" />
+                </svg>
+                Newest
+                <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                >
+                    <polyline points="6 9 12 15 18 9" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Template Gallery -->
+<section class="template-section">
+    <h2 class="template-section-title">
+        {{ active_filter_name | default('Image') }}
+    </h2>
+
+    <div class="template-grid">
+        {% for template in templates %}
+        <!-- Template Card: {{ template.title }} -->
+        <div
+            class="template-card"
+            data-id="{{ template.id }}"
+            data-type="{{ template.category }}"
+            data-has-quickgen="{{ 'true' if template.exposed_nodes else 'false' }}"
+            onclick="openTemplate('{{ template.id }}', '{{ template.workflow_file }}', {{ 'true' if template.exposed_nodes else 'false' }})"
+        >
+            {% if is_admin %}
+            <button
+                type="button"
+                class="template-edit-btn"
+                onclick="event.stopPropagation(); openEditModal('{{ template.id }}')"
+            >
+                <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                >
+                    <path
+                        d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"
+                    />
+                    <path
+                        d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"
+                    />
+                </svg>
+            </button>
+            {% endif %} {% if template.exposed_nodes %}
+            <div
+                class="quickgen-badge"
+                title="QuickGen enabled - simplified generation"
+            >
+                <svg
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                >
+                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2" />
+                </svg>
+                QuickGen
+            </div>
+            {% endif %}
+            <div class="template-card-image">
+                <div class="template-image-slider">
+                    {% if template.preview_image_a %}
+                    <img
+                        src="/workflow/preview/{{ template.preview_image_a }}"
+                        alt="{{ template.title }}"
+                        class="template-image template-image-before"
+                    />
+                    {% else %}
+                    <div
+                        class="template-image template-image-before template-image-placeholder"
+                        style="
+                            background: linear-gradient(
+                                135deg,
+                                #7c3aed 0%,
+                                #3b82f6 100%
+                            );
+                        "
+                    ></div>
+                    {% endif %} {% if template.preview_image_b %}
+                    <img
+                        src="/workflow/preview/{{ template.preview_image_b }}"
+                        alt="{{ template.title }} - after"
+                        class="template-image template-image-after"
+                    />
+                    {% elif template.preview_image_a %}
+                    <img
+                        src="/workflow/preview/{{ template.preview_image_a }}"
+                        alt="{{ template.title }}"
+                        class="template-image template-image-after"
+                    />
+                    {% else %}
+                    <div
+                        class="template-image template-image-after template-image-placeholder"
+                        style="
+                            background: linear-gradient(
+                                135deg,
+                                #3b82f6 0%,
+                                #10b981 100%
+                            );
+                        "
+                    ></div>
+                    {% endif %}
+                </div>
+                {% if template.logo_text %}
+                <div class="template-logo">
+                    <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                    >
+                        <path
+                            d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"
+                        />
+                    </svg>
+                    <span>{{ template.logo_text }}</span>
+                </div>
+                {% endif %}
+                <div class="template-card-tags">
+                    {% for tag in template.tags %}
+                    <span class="template-tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="template-card-content">
+                <h3 class="template-card-title">{{ template.title }}</h3>
+                <p class="template-card-desc">{{ template.description }}</p>
+            </div>
+        </div>
+        {% endfor %} {% if is_admin %}
+        <!-- Add New Template Card -->
+        <div
+            class="template-card template-card-add"
+            onclick="openEditModal(null)"
+        >
+            <div class="template-card-add-content">
+                <svg
+                    width="48"
+                    height="48"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="1.5"
+                >
+                    <line x1="12" y1="5" x2="12" y2="19" />
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                </svg>
+                <span>Add New Template</span>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+{% if is_admin %}
+<!-- Edit Template Modal -->
+<div class="modal-overlay" id="edit-template-modal">
+    <div class="modal template-edit-modal">
+        <!-- Unsaved Changes Confirmation Dialog -->
+        <div
+            class="confirm-dialog"
+            id="unsaved-changes-dialog"
+            style="display: none"
+        >
+            <div class="confirm-dialog-content">
+                <h3>Unsaved Changes</h3>
+                <p>
+                    You have unsaved changes. Are you sure you want to close
+                    without saving?
+                </p>
+                <div class="confirm-dialog-actions">
+                    <button
+                        type="button"
+                        class="btn-secondary"
+                        onclick="cancelCloseModal()"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        type="button"
+                        class="btn-danger"
+                        onclick="forceCloseModal()"
+                    >
+                        Discard Changes
+                    </button>
+                </div>
+            </div>
+        </div>
+        <form id="template-form" onsubmit="saveTemplate(event)">
+            <input type="hidden" id="template-id" name="id" />
+
+            <div class="form-group">
+                <label for="template-title">Title</label>
+                <input
+                    type="text"
+                    id="template-title"
+                    name="title"
+                    class="form-input"
+                    required
+                />
+            </div>
+
+            <div class="form-group">
+                <label for="template-description">Description</label>
+                <textarea
+                    id="template-description"
+                    name="description"
+                    class="form-input"
+                    rows="2"
+                ></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="template-category">Category</label>
+                    <select
+                        id="template-category"
+                        name="category"
+                        class="form-input"
+                    >
+                        <option value="image">Image</option>
+                        <option value="video">Video</option>
+                        <option value="audio">Audio</option>
+                        <option value="3d-model">3D Model</option>
+                        <option value="llm">LLM</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="template-tags">Tags (comma separated)</label>
+                    <input
+                        type="text"
+                        id="template-tags"
+                        name="tags"
+                        class="form-input"
+                        placeholder="Image Edit, ControlNet"
+                    />
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="template-logo">Logo Text (optional)</label>
+                <input
+                    type="text"
+                    id="template-logo"
+                    name="logo_text"
+                    class="form-input"
+                    placeholder="Flux.2 [Max]"
+                />
+            </div>
+
+            <div
+                class="form-row"
+                style="
+                    margin-top: var(--space-4);
+                    padding-top: var(--space-4);
+                    border-top: 1px solid var(--border-default);
+                "
+            >
+                <div class="form-group">
+                    <label>Workflow JSON</label>
+                    <div class="file-upload-row">
+                        <input
+                            type="file"
+                            id="workflow-file"
+                            accept=".json"
+                            onchange="uploadTemplateFile('workflow')"
+                            style="display: none"
+                        />
+                        <button
+                            type="button"
+                            class="btn-secondary"
+                            onclick="document.getElementById('workflow-file').click()"
+                        >
+                            Upload Workflow
+                        </button>
+                        <span
+                            id="workflow-file-status"
+                            class="file-status"
+                        ></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>API Workflow JSON (optional)</label>
+                    <div class="file-upload-row">
+                        <input
+                            type="file"
+                            id="workflow-api-file"
+                            accept=".json"
+                            onchange="uploadTemplateFile('workflow_api')"
+                            style="display: none"
+                        />
+                        <button
+                            type="button"
+                            class="btn-secondary"
+                            onclick="document.getElementById('workflow-api-file').click()"
+                        >
+                            Upload API Workflow
+                        </button>
+                        <span
+                            id="workflow-api-file-status"
+                            class="file-status"
+                        ></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Preview Image A (Before)</label>
+                    <div class="file-upload-row">
+                        <input
+                            type="file"
+                            id="preview-a-file"
+                            accept="image/*"
+                            onchange="uploadTemplateFile('preview_a')"
+                            style="display: none"
+                        />
+                        <button
+                            type="button"
+                            class="btn-secondary"
+                            onclick="document.getElementById('preview-a-file').click()"
+                        >
+                            Upload Image A
+                        </button>
+                        <span
+                            id="preview-a-file-status"
+                            class="file-status"
+                        ></span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Preview Image B (After)</label>
+                    <div class="file-upload-row">
+                        <input
+                            type="file"
+                            id="preview-b-file"
+                            accept="image/*"
+                            onchange="uploadTemplateFile('preview_b')"
+                            style="display: none"
+                        />
+                        <button
+                            type="button"
+                            class="btn-secondary"
+                            onclick="document.getElementById('preview-b-file').click()"
+                        >
+                            Upload Image B
+                        </button>
+                        <span
+                            id="preview-b-file-status"
+                            class="file-status"
+                        ></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- QuickGen Settings Section (collapsible) -->
+            <div
+                class="form-section-title quickgen-section-header"
+                onclick="toggleQuickGenSettings()"
+                style="
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                "
+            >
+                <span>QuickGen Settings</span>
+                <svg
+                    id="quickgen-chevron"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    width="16"
+                    height="16"
+                    style="transition: transform 0.2s ease"
+                >
+                    <polyline points="6 9 12 15 18 9" />
+                </svg>
+            </div>
+            <div id="quickgen-settings" style="display: none">
+                <p
+                    id="quickgen-no-api"
+                    class="text-muted"
+                    style="font-size: 13px; margin-bottom: 12px"
+                >
+                    Upload an API Workflow JSON to configure QuickGen exposed
+                    nodes.
+                </p>
+                <div id="quickgen-nodes-container" style="display: none">
+                    <p
+                        class="text-muted"
+                        style="font-size: 13px; margin-bottom: 12px"
+                    >
+                        Select which nodes to expose in the QuickGen interface:
+                    </p>
+                    <div id="quickgen-nodes-list" class="quickgen-nodes-list">
+                        <!-- Nodes will be populated here dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-actions" style="justify-content: flex-end">
+                <button
+                    type="button"
+                    class="btn-danger"
+                    id="delete-template-btn"
+                    onclick="deleteTemplate()"
+                    style="display: none; margin-right: auto"
+                >
+                    Delete
+                </button>
+                <button
+                    type="button"
+                    class="btn-secondary"
+                    onclick="tryCloseModal()"
+                >
+                    Cancel
+                </button>
+                <button type="submit" class="btn-primary">Save</button>
+                <button
+                    type="button"
+                    class="btn-commit"
+                    onclick="commitToGit()"
+                    style="margin-left: var(--space-2)"
+                >
+                    <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        stroke-width="2"
+                    >
+                        <circle cx="12" cy="12" r="4" />
+                        <line x1="1.05" y1="12" x2="7" y2="12" />
+                        <line x1="17.01" y1="12" x2="22.96" y2="12" />
+                    </svg>
+                    Commit & Push
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<!-- Tutorials Section (commented out for now)
+<section>
+    <div class="section-header">
+        <h2 class="section-title">Tutorials</h2>
+        <a href="#" class="section-more">More ></a>
+    </div>
+    ...
+</section>
+-->
+
+<!-- News Section (commented out for now)
+<section>
+    <div class="section-header">
+        <h2 class="section-title">News</h2>
+        <a href="#" class="section-more">More ></a>
+    </div>
+    ...
+</section>
+-->
+
+{% endblock %} {% block scripts %}
+<script>
+    // Current template being edited
+    let currentTemplateId = null;
+    let templatesData = {};
+
+    // Load templates data on page load
+    fetch('/api/templates')
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                data.templates.forEach(t => {
+                    templatesData[t.id] = t;
+                });
+            }
+        });
+
+    // Search functionality
+    const searchInput = document.getElementById("template-search");
+    const searchClear = document.getElementById("search-clear");
+    const templateCards = document.querySelectorAll(".template-card:not(.template-card-add)");
+
+    searchInput.addEventListener("input", function () {
+        const query = this.value.toLowerCase();
+        searchClear.style.display = query ? "flex" : "none";
+
+        templateCards.forEach((card) => {
+            const title = card.querySelector(".template-card-title")?.textContent.toLowerCase() || "";
+            const desc = card.querySelector(".template-card-desc")?.textContent.toLowerCase() || "";
+            const tags = Array.from(card.querySelectorAll(".template-tag"))
+                .map((t) => t.textContent.toLowerCase())
+                .join(" ");
+
+            if (title.includes(query) || desc.includes(query) || tags.includes(query)) {
+                card.style.display = "";
+            } else {
+                card.style.display = "none";
+            }
+        });
+    });
+
+    searchClear.addEventListener("click", function () {
+        searchInput.value = "";
+        searchClear.style.display = "none";
+        templateCards.forEach((card) => (card.style.display = ""));
+    });
+
+    // Initially hide clear button
+    searchClear.style.display = "none";
+
+    // Image comparison slider - reveals image B based on mouse position
+    // When images are zoomed at 1.05x, we need to adjust the clip-path to account for the zoom
+    const ZOOM_SCALE = 1.05;
+
+    document.querySelectorAll('.template-image-slider').forEach(slider => {
+        const beforeImg = slider.querySelector('.template-image-before');
+        const sliderLine = slider;
+
+        slider.addEventListener('mousemove', (e) => {
+            const rect = slider.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const percent = (x / rect.width) * 100;
+
+            // When zoomed, the image extends beyond container by (scale-1)/2 on each side
+            // So 1.05x zoom means 2.5% extra on each side
+            // We need to adjust the clip-path to account for this
+            const zoomOffset = ((ZOOM_SCALE - 1) / 2) * 100; // 2.5%
+
+            // Map the container percentage to the zoomed image percentage
+            // The visible area in the zoomed image goes from zoomOffset to (100 - zoomOffset)
+            const adjustedPercent = zoomOffset + (percent * (100 - 2 * zoomOffset) / 100);
+
+            // Clip the "before" image from the right based on adjusted position
+            if (beforeImg) {
+                beforeImg.style.clipPath = `inset(0 ${100 - adjustedPercent}% 0 0)`;
+            }
+            // Move the slider line (this stays at container percentage)
+            sliderLine.style.setProperty('--slider-pos', `${percent}%`);
+        });
+
+        slider.addEventListener('mouseleave', () => {
+            // Reset to 50% position (show both images equally)
+            // For 50% container position, adjusted is 2.5 + (50 * 95 / 100) = 50%
+            if (beforeImg) {
+                beforeImg.style.clipPath = 'inset(0 50% 0 0)';
+            }
+            sliderLine.style.setProperty('--slider-pos', '50%');
+        });
+    });
+
+    // Open template - either QuickGen or ComfyUI
+    function openTemplate(templateId, workflowFile, hasQuickGen) {
+        if (hasQuickGen) {
+            // Open QuickGen page for simplified generation
+            window.location.href = '/quickgen/' + templateId;
+        } else {
+            openWorkflow(templateId, workflowFile);
+        }
+    }
+
+    // Open workflow in ComfyUI
+    function openWorkflow(templateId, workflowFile) {
+        if (!workflowFile) {
+            alert("No workflow file assigned to this template yet.");
+            return;
+        }
+        // Open ComfyUI with the workflow
+        // First check if ComfyUI is running, if not start it
+        window.open('/tool/comfy-ui?workflow=' + encodeURIComponent(workflowFile), '_blank');
+    }
+
+    {% if is_admin %}
+    // Track form state for unsaved changes detection
+    let initialFormState = {};
+    let hasUnsavedChanges = false;
+    let pendingClose = false;
+
+    // Capture initial form state
+    function captureFormState() {
+        initialFormState = {
+            title: document.getElementById("template-title").value,
+            description: document.getElementById("template-description").value,
+            category: document.getElementById("template-category").value,
+            tags: document.getElementById("template-tags").value,
+            logo: document.getElementById("template-logo").value
+        };
+        hasUnsavedChanges = false;
+    }
+
+    // Check if form has changed
+    function checkFormChanges() {
+        const current = {
+            title: document.getElementById("template-title").value,
+            description: document.getElementById("template-description").value,
+            category: document.getElementById("template-category").value,
+            tags: document.getElementById("template-tags").value,
+            logo: document.getElementById("template-logo").value
+        };
+        hasUnsavedChanges = JSON.stringify(current) !== JSON.stringify(initialFormState);
+        return hasUnsavedChanges;
+    }
+
+    // Try to close modal - show confirmation if unsaved changes
+    function tryCloseModal() {
+        checkFormChanges();
+        if (hasUnsavedChanges) {
+            document.getElementById("unsaved-changes-dialog").style.display = "flex";
+            pendingClose = true;
+        } else {
+            forceCloseModal();
+        }
+    }
+
+    // Cancel the close action
+    function cancelCloseModal() {
+        document.getElementById("unsaved-changes-dialog").style.display = "none";
+        pendingClose = false;
+    }
+
+    // Force close without saving
+    function forceCloseModal() {
+        document.getElementById("unsaved-changes-dialog").style.display = "none";
+        document.getElementById("edit-template-modal").classList.remove("active");
+        currentTemplateId = null;
+        hasUnsavedChanges = false;
+        pendingClose = false;
+    }
+
+    // Open edit modal
+    function openEditModal(templateId) {
+        currentTemplateId = templateId;
+        const modal = document.getElementById("edit-template-modal");
+        const form = document.getElementById("template-form");
+        const deleteBtn = document.getElementById("delete-template-btn");
+
+        // Reset form
+        form.reset();
+        document.getElementById("workflow-file-status").textContent = "";
+        document.getElementById("workflow-api-file-status").textContent = "";
+        document.getElementById("preview-a-file-status").textContent = "";
+        document.getElementById("preview-b-file-status").textContent = "";
+
+        if (templateId && templatesData[templateId]) {
+            // Edit existing template
+            const t = templatesData[templateId];
+            document.getElementById("template-id").value = t.id;
+            document.getElementById("template-title").value = t.title || "";
+            document.getElementById("template-description").value = t.description || "";
+            document.getElementById("template-category").value = t.category || "image";
+            document.getElementById("template-tags").value = (t.tags || []).join(", ");
+            document.getElementById("template-logo").value = t.logo_text || "";
+
+            // Show file statuses
+            if (t.workflow_file) {
+                document.getElementById("workflow-file-status").textContent = t.workflow_file;
+            }
+            if (t.workflow_api_file) {
+                document.getElementById("workflow-api-file-status").textContent = t.workflow_api_file;
+                // Load and parse the API workflow for QuickGen settings
+                loadApiWorkflowForQuickGen(t.id, t.exposed_nodes || []);
+            }
+            if (t.preview_image_a) {
+                document.getElementById("preview-a-file-status").textContent = t.preview_image_a;
+            }
+            if (t.preview_image_b) {
+                document.getElementById("preview-b-file-status").textContent = t.preview_image_b;
+            }
+
+            deleteBtn.style.display = "block";
+        } else {
+            // Create new template
+            document.getElementById("template-id").value = "";
+            deleteBtn.style.display = "none";
+            // Reset QuickGen settings
+            document.getElementById("quickgen-no-api").style.display = "block";
+            document.getElementById("quickgen-nodes-container").style.display = "none";
+            document.getElementById("quickgen-nodes-list").innerHTML = "";
+        }
+
+        // Collapse QuickGen section by default
+        document.getElementById("quickgen-settings").style.display = "none";
+        document.getElementById("quickgen-chevron").style.transform = "rotate(0deg)";
+
+        modal.classList.add("active");
+
+        // Capture initial state after a small delay to ensure form is populated
+        setTimeout(captureFormState, 50);
+
+        // Add change listeners to form inputs
+        const formInputs = form.querySelectorAll('input, textarea, select');
+        formInputs.forEach(input => {
+            input.addEventListener('input', checkFormChanges);
+            input.addEventListener('change', checkFormChanges);
+        });
+    }
+
+    // Close edit modal (called after successful save)
+    function closeEditModal() {
+        hasUnsavedChanges = false;
+        forceCloseModal();
+    }
+
+    // Save template
+    function saveTemplate(event) {
+        event.preventDefault();
+
+        const id = document.getElementById("template-id").value;
+        const tagsStr = document.getElementById("template-tags").value;
+        const tags = tagsStr ? tagsStr.split(",").map(t => t.trim()).filter(t => t) : [];
+
+        const data = {
+            title: document.getElementById("template-title").value,
+            description: document.getElementById("template-description").value,
+            category: document.getElementById("template-category").value,
+            tags: tags,
+            logo_text: document.getElementById("template-logo").value || null,
+            exposed_nodes: getExposedNodesForSave()
+        };
+
+        const url = id ? `/api/templates/${id}` : "/api/templates";
+        const method = id ? "PUT" : "POST";
+
+        fetch(url, {
+            method: method,
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data)
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                // Update local data
+                templatesData[result.template.id] = result.template;
+                // Mark as saved (no unsaved changes)
+                hasUnsavedChanges = false;
+                captureFormState();
+                if (!id) {
+                    currentTemplateId = result.template.id;
+                    document.getElementById("template-id").value = result.template.id;
+                    document.getElementById("delete-template-btn").style.display = "block";
+                }
+                alert("Template saved! Don't forget to 'Commit & Push to Git' to save permanently.");
+            } else {
+                alert("Error: " + result.message);
+            }
+        })
+        .catch(err => alert("Error saving template: " + err));
+    }
+
+    // Upload template file (auto-saves if new template)
+    async function uploadTemplateFile(fileType) {
+        let templateId = document.getElementById("template-id").value;
+
+        // If no template ID, auto-save first
+        if (!templateId) {
+            const title = document.getElementById("template-title").value;
+            if (!title) {
+                alert("Please enter a title before uploading files.");
+                return;
+            }
+
+            // Auto-save the template first
+            const tagsStr = document.getElementById("template-tags").value;
+            const tags = tagsStr ? tagsStr.split(",").map(t => t.trim()).filter(t => t) : [];
+
+            const data = {
+                title: title,
+                description: document.getElementById("template-description").value,
+                category: document.getElementById("template-category").value,
+                tags: tags,
+                logo_text: document.getElementById("template-logo").value || null
+            };
+
+            try {
+                const response = await fetch("/api/templates", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+
+                if (result.success) {
+                    templateId = result.template.id;
+                    templatesData[templateId] = result.template;
+                    document.getElementById("template-id").value = templateId;
+                    document.getElementById("delete-template-btn").style.display = "block";
+                } else {
+                    alert("Error saving template: " + result.message);
+                    return;
+                }
+            } catch (err) {
+                alert("Error saving template: " + err);
+                return;
+            }
+        }
+
+        let fileInput;
+        let statusSpan;
+
+        switch(fileType) {
+            case 'workflow':
+                fileInput = document.getElementById("workflow-file");
+                statusSpan = document.getElementById("workflow-file-status");
+                break;
+            case 'workflow_api':
+                fileInput = document.getElementById("workflow-api-file");
+                statusSpan = document.getElementById("workflow-api-file-status");
+                break;
+            case 'preview_a':
+                fileInput = document.getElementById("preview-a-file");
+                statusSpan = document.getElementById("preview-a-file-status");
+                break;
+            case 'preview_b':
+                fileInput = document.getElementById("preview-b-file");
+                statusSpan = document.getElementById("preview-b-file-status");
+                break;
+        }
+
+        if (!fileInput.files || !fileInput.files[0]) return;
+
+        const formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+        formData.append("type", fileType);
+
+        statusSpan.textContent = "Uploading...";
+
+        // If uploading API workflow, also read it for QuickGen parsing
+        let apiWorkflowData = null;
+        if (fileType === 'workflow_api') {
+            try {
+                const fileContent = await fileInput.files[0].text();
+                apiWorkflowData = JSON.parse(fileContent);
+            } catch (e) {
+                console.error("Error parsing API workflow JSON:", e);
+            }
+        }
+
+        fetch(`/api/templates/${templateId}/upload`, {
+            method: "POST",
+            body: formData
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                statusSpan.textContent = result.filename;
+                // Update local data
+                if (templatesData[templateId]) {
+                    if (fileType === 'workflow') templatesData[templateId].workflow_file = result.filename;
+                    if (fileType === 'workflow_api') {
+                        templatesData[templateId].workflow_api_file = result.filename;
+                        // Parse and display QuickGen nodes
+                        if (apiWorkflowData) {
+                            parseAndDisplayQuickGenNodes(apiWorkflowData, templatesData[templateId].exposed_nodes || []);
+                        }
+                    }
+                    if (fileType === 'preview_a') templatesData[templateId].preview_image_a = result.filename;
+                    if (fileType === 'preview_b') templatesData[templateId].preview_image_b = result.filename;
+                }
+            } else {
+                statusSpan.textContent = "Error!";
+                alert("Error: " + result.message);
+            }
+        })
+        .catch(err => {
+            statusSpan.textContent = "Error!";
+            alert("Error uploading file: " + err);
+        });
+    }
+
+    // Delete template
+    function deleteTemplate() {
+        const templateId = document.getElementById("template-id").value;
+        if (!templateId) return;
+
+        if (!confirm("Are you sure you want to delete this template?")) return;
+
+        fetch(`/api/templates/${templateId}`, {
+            method: "DELETE"
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                delete templatesData[templateId];
+                closeEditModal();
+                location.reload();
+            } else {
+                alert("Error: " + result.message);
+            }
+        })
+        .catch(err => alert("Error deleting template: " + err));
+    }
+
+    // QuickGen Settings Functions
+    function toggleQuickGenSettings() {
+        const settings = document.getElementById("quickgen-settings");
+        const chevron = document.getElementById("quickgen-chevron");
+        if (settings.style.display === "none") {
+            settings.style.display = "block";
+            chevron.style.transform = "rotate(180deg)";
+        } else {
+            settings.style.display = "none";
+            chevron.style.transform = "rotate(0deg)";
+        }
+    }
+
+    async function loadApiWorkflowForQuickGen(templateId, existingExposedNodes) {
+        try {
+            const response = await fetch(`/api/templates/${templateId}/workflow-api`);
+            if (response.ok) {
+                const workflowData = await response.json();
+                parseAndDisplayQuickGenNodes(workflowData, existingExposedNodes);
+            }
+        } catch (e) {
+            console.error("Error loading API workflow:", e);
+        }
+    }
+
+    function parseAndDisplayQuickGenNodes(workflowData, existingExposedNodes) {
+        const noApiMsg = document.getElementById("quickgen-no-api");
+        const container = document.getElementById("quickgen-nodes-container");
+        const nodesList = document.getElementById("quickgen-nodes-list");
+
+        noApiMsg.style.display = "none";
+        container.style.display = "block";
+        nodesList.innerHTML = "";
+
+        // Parse the workflow to extract nodes with configurable inputs
+        const nodes = [];
+        for (const [nodeId, nodeData] of Object.entries(workflowData)) {
+            const title = nodeData._meta?.title || nodeData.class_type || `Node ${nodeId}`;
+            const classType = nodeData.class_type;
+            const inputs = nodeData.inputs || {};
+
+            // Filter out inputs that are references to other nodes (arrays)
+            const configurableInputs = [];
+            for (const [inputName, inputValue] of Object.entries(inputs)) {
+                // Skip if it's a node reference (array like ["109", 0])
+                if (!Array.isArray(inputValue)) {
+                    // Determine input type - detect special node types
+                    let inputType = typeof inputValue;
+
+                    // LoadImage nodes have an 'image' input that should be treated as IMAGE type
+                    if (classType === 'LoadImage' && inputName === 'image') {
+                        inputType = 'IMAGE';
+                    }
+                    // Can add more special cases here as needed:
+                    // else if (classType === 'LoadVideo' && inputName === 'video') {
+                    //     inputType = 'VIDEO';
+                    // }
+
+                    configurableInputs.push({
+                        name: inputName,
+                        value: inputValue,
+                        type: inputType
+                    });
+                }
+            }
+
+            if (configurableInputs.length > 0) {
+                nodes.push({
+                    id: nodeId,
+                    title: title,
+                    classType: classType,
+                    inputs: configurableInputs
+                });
+            }
+        }
+
+        // Create existing exposed nodes lookup
+        const exposedLookup = {};
+        existingExposedNodes.forEach(en => {
+            exposedLookup[`${en.node_id}:${en.input_name}`] = en;
+        });
+
+        // Render nodes as checkboxes
+        nodes.forEach(node => {
+            const nodeDiv = document.createElement("div");
+            nodeDiv.className = "quickgen-node-group";
+            nodeDiv.innerHTML = `<div class="quickgen-node-title">${node.title} <span class="text-muted">(${node.classType})</span></div>`;
+
+            node.inputs.forEach(input => {
+                const key = `${node.id}:${input.name}`;
+                const isChecked = exposedLookup[key] ? "checked" : "";
+                const customLabel = exposedLookup[key]?.label || "";
+                const displayValue = typeof input.value === 'string'
+                    ? (input.value.length > 50 ? input.value.substring(0, 50) + '...' : input.value)
+                    : input.value;
+
+                const inputDiv = document.createElement("div");
+                inputDiv.className = "quickgen-input-row";
+                inputDiv.innerHTML = `
+                    <label class="quickgen-checkbox-label">
+                        <input type="checkbox"
+                               class="quickgen-node-checkbox"
+                               data-node-id="${node.id}"
+                               data-node-title="${node.title}"
+                               data-input-name="${input.name}"
+                               data-input-type="${input.type}"
+                               data-class-type="${node.classType}"
+                               ${isChecked}
+                               onchange="updateExposedNodes()">
+                        <span class="quickgen-input-name">${input.name}</span>
+                        <span class="quickgen-input-preview text-muted">${displayValue}</span>
+                    </label>
+                    <input type="text"
+                           class="quickgen-label-input form-input"
+                           placeholder="Custom label (optional)"
+                           data-node-id="${node.id}"
+                           data-input-name="${input.name}"
+                           value="${customLabel}"
+                           onchange="updateExposedNodes()"
+                           style="width: 150px; font-size: 12px; padding: 4px 8px;">
+                `;
+                nodeDiv.appendChild(inputDiv);
+            });
+
+            nodesList.appendChild(nodeDiv);
+        });
+    }
+
+    function updateExposedNodes() {
+        const checkboxes = document.querySelectorAll(".quickgen-node-checkbox:checked");
+        const exposedNodes = [];
+
+        checkboxes.forEach(cb => {
+            const nodeId = cb.dataset.nodeId;
+            const inputName = cb.dataset.inputName;
+            const labelInput = document.querySelector(`.quickgen-label-input[data-node-id="${nodeId}"][data-input-name="${inputName}"]`);
+
+            exposedNodes.push({
+                node_id: nodeId,
+                node_title: cb.dataset.nodeTitle,
+                input_name: inputName,
+                input_type: cb.dataset.inputType,
+                class_type: cb.dataset.classType,
+                label: labelInput?.value || ""
+            });
+        });
+
+        // Store in hidden field or directly in templatesData
+        const templateId = document.getElementById("template-id").value;
+        if (templateId && templatesData[templateId]) {
+            templatesData[templateId].exposed_nodes = exposedNodes;
+        }
+
+        // Mark form as changed
+        if (typeof checkFormChanges === 'function') {
+            checkFormChanges();
+        }
+    }
+
+    function getExposedNodesForSave() {
+        const checkboxes = document.querySelectorAll(".quickgen-node-checkbox:checked");
+        const exposedNodes = [];
+
+        checkboxes.forEach(cb => {
+            const nodeId = cb.dataset.nodeId;
+            const inputName = cb.dataset.inputName;
+            const labelInput = document.querySelector(`.quickgen-label-input[data-node-id="${nodeId}"][data-input-name="${inputName}"]`);
+
+            exposedNodes.push({
+                node_id: nodeId,
+                node_title: cb.dataset.nodeTitle,
+                input_name: inputName,
+                input_type: cb.dataset.inputType,
+                class_type: cb.dataset.classType,
+                label: labelInput?.value || ""
+            });
+        });
+
+        return exposedNodes;
+    }
+
+    // Commit and push to git
+    function commitToGit() {
+        // Auto-generate commit message from current template title or use default
+        const title = document.getElementById("template-title").value;
+        const message = title ? `Update template: ${title}` : "Update workflow templates";
+
+        fetch("/api/templates/commit", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ message: message })
+        })
+        .then(response => response.json())
+        .then(result => {
+            if (result.success) {
+                alert("Changes committed and pushed to Git successfully!");
+            } else {
+                alert("Error: " + result.message);
+            }
+        })
+        .catch(err => alert("Error committing to Git: " + err));
+    }
+
+    // Close modal on overlay click
+    document.getElementById("edit-template-modal").addEventListener("click", function(e) {
+        if (e.target === this) {
+            tryCloseModal();
+        }
+    });
+
+    // Handle Escape key for this modal specifically
+    document.addEventListener("keydown", function(e) {
+        if (e.key === "Escape") {
+            const modal = document.getElementById("edit-template-modal");
+            const confirmDialog = document.getElementById("unsaved-changes-dialog");
+            if (modal.classList.contains("active")) {
+                e.preventDefault();
+                e.stopPropagation();
+                if (confirmDialog.style.display === "flex") {
+                    cancelCloseModal();
+                } else {
+                    tryCloseModal();
+                }
+            }
+        }
+    });
+    {% endif %}
+</script>
+
+<style>
+    /* Confirmation dialog styles */
+    .confirm-dialog {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        border-radius: var(--radius-lg);
+    }
+
+    .confirm-dialog-content {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 24px;
+        max-width: 400px;
+        text-align: center;
+    }
+
+    .confirm-dialog-content h3 {
+        margin: 0 0 12px 0;
+        color: var(--text-primary);
+        font-size: 18px;
+    }
+
+    .confirm-dialog-content p {
+        margin: 0 0 20px 0;
+        color: var(--text-secondary);
+        font-size: 14px;
+        line-height: 1.5;
+    }
+
+    .confirm-dialog-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+    }
+
+    .confirm-dialog-actions button {
+        min-width: 120px;
+    }
+</style>
+{% endblock %}
