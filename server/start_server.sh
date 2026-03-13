@@ -1,24 +1,10 @@
 #!/bin/bash
-# ABOUTME: Entrypoint for SF AI Game Jam container
-# ABOUTME: Runs the original 5090 start script (ComfyUI, SSH, Jupyter, FileBrowser) then starts Flask
+# ABOUTME: Starts the SF AI Game Jam server from the git repo.
+# ABOUTME: Called by entrypoint.sh after the repo is cloned/updated.
+# This file lives in the repo so changes take effect on pod restart (no rebuild).
 
 WORKSPACE_DIR="/workspace"
-REPO_URL="https://github.com/razvanmatei-sf/sfg-ai-game-jam.git"
-REPO_DIR="$WORKSPACE_DIR/sfg-ai-game-jam"
-BRANCH="main"
-
-# Clone or update the repository
-echo "Syncing repository..."
-if [ -d "$REPO_DIR/.git" ]; then
-    cd "$REPO_DIR"
-    git fetch --all || echo "Warning: git fetch failed"
-    git checkout "$BRANCH" 2>/dev/null || git checkout -b "$BRANCH" "origin/$BRANCH" || echo "Warning: checkout failed"
-    git reset --hard "origin/$BRANCH" || echo "Warning: reset failed"
-    git pull origin "$BRANCH" || echo "Warning: pull failed"
-else
-    rm -rf "$REPO_DIR"
-    git clone -b "$BRANCH" "$REPO_URL" "$REPO_DIR" || echo "Warning: clone failed"
-fi
+REPO_DIR="${REPO_DIR:-$WORKSPACE_DIR/sfg-ai-game-jam}"
 
 # Make setup scripts executable
 find "$REPO_DIR/setup" -name "*.sh" -exec chmod +x {} \; 2>/dev/null
@@ -29,7 +15,7 @@ ln -sfn /workspace/runpod-slim/ComfyUI /workspace/ComfyUI 2>/dev/null
 # Initialize passwords file on network volume (creates only if missing)
 bash "$REPO_DIR/setup/init_passwords.sh"
 
-# Symlink repo server files over image copies so git pull = live updates
+# Symlink repo server files over image copies so the server always runs latest code
 echo "Linking server files from repo..."
 ln -sfn "$REPO_DIR/server/server.py" /usr/local/bin/server.py
 ln -sfn "$REPO_DIR/server/user_management.py" /usr/local/bin/user_management.py
