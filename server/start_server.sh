@@ -29,6 +29,13 @@ ln -sfn /workspace/runpod-slim/ComfyUI /workspace/ComfyUI 2>/dev/null
 # Initialize passwords file on network volume (creates only if missing)
 bash "$REPO_DIR/setup/init_passwords.sh"
 
+# Symlink repo server files over image copies so git pull = live updates
+echo "Linking server files from repo..."
+ln -sfn "$REPO_DIR/server/server.py" /usr/local/bin/server.py
+ln -sfn "$REPO_DIR/server/user_management.py" /usr/local/bin/user_management.py
+ln -sfn "$REPO_DIR/server/templates" /usr/local/bin/templates
+ln -sfn "$REPO_DIR/server/static" /usr/local/bin/static
+
 # Export repo path for the Flask server
 export REPO_DIR="$REPO_DIR"
 
