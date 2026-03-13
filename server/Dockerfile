@@ -12,7 +12,7 @@ COPY static /usr/local/bin/static
 RUN chmod +x /usr/local/bin/start_server.sh
 
 # Install Flask (Python 3.12 is already in the base image)
-RUN pip install --no-cache-dir Flask
+RUN pip install --no-cache-dir --ignore-installed Flask
 
 # Expose Flask server port (8090 to avoid clash with FileBrowser on 8080)
 EXPOSE 8090
