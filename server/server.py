@@ -4254,14 +4254,14 @@ def set_artist():
         password = request.form.get("password", "")
         autostart_comfyui = request.form.get("autostart_comfyui") == "on"
 
-    # Validate password if passwords are configured
-    if PASSWORDS:
-        expected = PASSWORDS.get(artist, "")
-        if not expected or password != expected:
-            if request.is_json:
-                return jsonify({"success": False, "error": "Invalid password"}), 401
-            teams = get_all_users()
-            return render_template("login.html", teams=teams, error="Invalid password", selected_team=artist)
+    # Validate password
+    expected = PASSWORDS.get(artist, "")
+    if not expected or password != expected:
+        error_msg = "Invalid password" if PASSWORDS else "Passwords not configured — run init_passwords.sh"
+        if request.is_json:
+            return jsonify({"success": False, "error": error_msg}), 401
+        teams = get_all_users()
+        return render_template("login.html", teams=teams, error=error_msg, selected_team=artist)
 
     current_artist = artist
 
