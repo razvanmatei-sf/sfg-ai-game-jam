@@ -9,7 +9,7 @@ fi
 ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts 2>/dev/null
 
 # Sync workflows from private repo
-cd /workspace/ComfyUI/user/default/workflows
+cd /workspace/runpod-slim/ComfyUI/user/default/workflows
 git pull
 
 apt update
