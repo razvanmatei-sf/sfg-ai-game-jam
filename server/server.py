@@ -4702,6 +4702,26 @@ def clear_logs():
         return jsonify({"success": False, "message": str(e)})
 
 
+COMFY_SETTINGS_PATH = "/workspace/runpod-slim/ComfyUI/user/default/comfy.settings.json"
+PERSISTED_SETTINGS_PATH = "/workspace/.comfy.settings.json"
+
+
+@app.route("/api/comfy-settings/save", methods=["POST"])
+def save_comfy_settings():
+    """Persist current ComfyUI settings to network volume (admin only)."""
+    if not is_admin(current_artist):
+        return jsonify({"success": False, "error": "Admin only"}), 403
+    try:
+        if not os.path.exists(COMFY_SETTINGS_PATH):
+            return jsonify({"success": False, "error": "No ComfyUI settings file found"}), 404
+        import shutil
+        shutil.copy2(COMFY_SETTINGS_PATH, PERSISTED_SETTINGS_PATH)
+        os.chmod(PERSISTED_SETTINGS_PATH, 0o600)
+        return jsonify({"success": True, "message": "ComfyUI settings saved to network volume"})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
+
+
 @app.route("/admin_action", methods=["POST"])
 def admin_action():
     """Handle admin install/update actions"""
