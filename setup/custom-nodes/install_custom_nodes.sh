@@ -16,6 +16,7 @@ if [ ! -d "/workspace/ComfyUI" ]; then
 fi
 
 source /workspace/runpod-slim/ComfyUI/.venv-cu128/bin/activate
+pip install uv 2>/dev/null || true
 mkdir -p "$CUSTOM_NODES_DIR"
 cd "$CUSTOM_NODES_DIR"
 
