@@ -38,7 +38,7 @@ app = Flask(
 )
 
 # Repository path (set by start_server.sh)
-REPO_DIR = os.environ.get("REPO_DIR", "/workspace/runpod-ggs")
+REPO_DIR = os.environ.get("REPO_DIR", "/workspace/sfg-ai-game-jam")
 
 # User process log file for streaming tool startup logs (legacy, kept for admin actions)
 USER_LOG_FILE = "/tmp/SF-AI-GameJam_user_log.txt"
@@ -2121,7 +2121,7 @@ def git_commit_and_push(message):
         )
 
         # Configure git to use token for authentication
-        repo_url = f"https://{github_token}@github.com/razvanmatei-sf/runpod-ggs.git"
+        repo_url = f"https://{github_token}@github.com/razvanmatei-sf/sfg-ai-game-jam.git"
 
         # Stage all changes in workflows directory
         subprocess.run(

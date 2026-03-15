@@ -6,7 +6,7 @@ set -e
 
 echo "Updating ComfyUI Custom Nodes..."
 
-REPO_DIR="${REPO_DIR:-/workspace/runpod-ggs}"
+REPO_DIR="${REPO_DIR:-/workspace/sfg-ai-game-jam}"
 NODES_CONFIG="$REPO_DIR/setup/custom-nodes/nodes.txt"
 CUSTOM_NODES_DIR="/workspace/ComfyUI/custom_nodes"
 

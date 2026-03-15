@@ -12,7 +12,7 @@ cd /workspace
 # are stored in /workspace/ and won't be deleted with ComfyUI
 rm -rf ComfyUI
 
-REPO_DIR="${REPO_DIR:-/workspace/runpod-ggs}"
+REPO_DIR="${REPO_DIR:-/workspace/sfg-ai-game-jam}"
 bash "$REPO_DIR/setup/comfy/install_comfy.sh"
 
 echo "ComfyUI reinstall complete"

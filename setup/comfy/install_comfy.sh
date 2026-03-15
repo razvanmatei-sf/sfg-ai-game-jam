@@ -146,7 +146,7 @@ cd ..
 echo "Installing ComfyUI requirements..."
 
 uv pip install -r requirements.txt
-uv pip install -r /workspace/runpod-ggs/setup/comfy/requirements.txt
+uv pip install -r /workspace/sfg-ai-game-jam/setup/comfy/requirements.txt
 
 pip uninstall xformers -y
 
@@ -162,6 +162,6 @@ apt install -y psmisc
 
 # Setup folder structure (models, outputs, inputs, workflows -> /workspace with symlinks)
 echo "Setting up folder structure..."
-/workspace/runpod-ggs/setup/comfy/symlinks.sh
+/workspace/sfg-ai-game-jam/setup/comfy/symlinks.sh
 
 echo "ComfyUI installation complete"
