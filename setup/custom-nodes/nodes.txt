@@ -29,3 +29,4 @@ https://github.com/rgthree/rgthree-comfy
 https://github.com/ltdrdata/was-node-suite-comfyui
 https://github.com/WaveSpeedAI/wavespeed-comfyui
 https://github.com/razvanmatei-sf/comfyui-stillfront
+https://github.com/razv23/comfyui-neuralsins.git
