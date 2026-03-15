@@ -348,6 +348,7 @@ TOOLS = {
         "port": 8188,
         "install_path": "/workspace/ComfyUI",
         "admin_only": False,
+        "docker_managed": True,
     },
     "jupyter-lab": {
         "name": "JupyterLab",
@@ -4028,12 +4029,12 @@ def tool_page(tool_id):
     tool = TOOLS[tool_id]
 
     # Get tool status
-    status = "stopped"
-    if tool_id in active_sessions:
-        if check_port_open(tool["port"]):
-            status = "running"
-        else:
-            status = "starting"
+    port_up = check_port_open(tool["port"]) if tool.get("port") else False
+    in_session = tool_id in active_sessions
+    if in_session or port_up:
+        status = "running" if port_up else "starting"
+    else:
+        status = "stopped"
 
     # Get logs for this tool
     logs = ""

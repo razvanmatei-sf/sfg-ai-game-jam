@@ -6,7 +6,21 @@ endblock %} {% block content %}
         class="status-dot {% if tool_status == 'running' %}running{% elif tool_status == 'starting' %}starting{% else %}stopped{% endif %}"
     ></span>
     <div id="tool-controls" class="tool-controls">
-        {% if tool_status == 'running' %}
+        {% if tool.docker_managed %}
+            {% if tool_status == 'running' %}
+            <button
+                type="button"
+                class="tool-btn tool-btn-open"
+                onclick="openTool('{{ tool_id }}')"
+            >
+                Open
+            </button>
+            {% else %}
+            <button type="button" class="tool-btn tool-btn-start" disabled style="opacity: 0.5">
+                Waiting for service...
+            </button>
+            {% endif %}
+        {% elif tool_status == 'running' %}
         <button
             type="button"
             class="tool-btn tool-btn-open"
@@ -81,7 +95,11 @@ endblock %} {% block content %}
         </div>
     </div>
     <div class="terminal-body" id="terminal-output">
-        {% if logs %} {{ logs }} {% else %}
+        {% if logs %} {{ logs }} {% elif tool.docker_managed %}
+        <span class="terminal-line"
+            >{{ tool.name }} is managed by the Docker image.</span
+        >
+        {% else %}
         <span class="terminal-line"
             >Ready. Click Start to launch {{ tool.name }}.</span
         >
@@ -93,6 +111,7 @@ endblock %} {% block content %}
     const toolId = '{{ tool_id }}';
     const toolPort = {{ tool.port }};
     const isSwarmUI = toolId === 'swarm-ui';
+    const isDockerManaged = {{ 'true' if tool.docker_managed else 'false' }};
     let logPollInterval = null;
     let statusPollInterval = null;
     let currentStatus = '{{ tool_status }}';
@@ -200,6 +219,20 @@ endblock %} {% block content %}
         // Update status dot
         statusDot.className = 'status-dot ' + status;
 
+        // Docker-managed tools only show Open when running
+        if (isDockerManaged) {
+            if (status === 'running') {
+                controls.innerHTML = `
+                    <button type="button" class="tool-btn tool-btn-open" onclick="openTool('${toolId}')">Open</button>
+                `;
+            } else {
+                controls.innerHTML = `
+                    <button type="button" class="tool-btn tool-btn-start" disabled style="opacity: 0.5">Waiting for service...</button>
+                `;
+            }
+            return;
+        }
+
         // Update controls based on status
         if (status === 'running') {
             controls.innerHTML = `
@@ -247,8 +280,8 @@ endblock %} {% block content %}
         }
     }
 
-    // Start polling if tool is running or starting
-    {% if tool_status in ['running', 'starting'] %}
+    // Start polling if tool is running, starting, or docker-managed (to detect when port comes up)
+    {% if tool_status in ['running', 'starting'] or tool.docker_managed %}
     startPolling();
     {% endif %}
 </script>
