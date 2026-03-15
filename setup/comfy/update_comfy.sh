@@ -7,7 +7,7 @@ set -e
 echo "Updating ComfyUI..."
 
 cd /workspace/ComfyUI
-source venv/bin/activate
+source /workspace/runpod-slim/ComfyUI/.venv-cu128/bin/activate
 
 git stash
 git pull --force

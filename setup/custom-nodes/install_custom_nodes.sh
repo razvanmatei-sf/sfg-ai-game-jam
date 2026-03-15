@@ -15,7 +15,7 @@ if [ ! -d "/workspace/ComfyUI" ]; then
     exit 1
 fi
 
-source /workspace/ComfyUI/venv/bin/activate
+source /workspace/runpod-slim/ComfyUI/.venv-cu128/bin/activate
 mkdir -p "$CUSTOM_NODES_DIR"
 cd "$CUSTOM_NODES_DIR"
 

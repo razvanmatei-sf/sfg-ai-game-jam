@@ -15,7 +15,7 @@ if [ ! -d "/workspace/ComfyUI" ]; then
     exit 1
 fi
 
-source /workspace/ComfyUI/venv/bin/activate
+source /workspace/runpod-slim/ComfyUI/.venv-cu128/bin/activate
 
 while read -r repo_url || [ -n "$repo_url" ]; do
     [[ "$repo_url" =~ ^#.*$ ]] || [ -z "$repo_url" ] && continue
