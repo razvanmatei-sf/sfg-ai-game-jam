@@ -16,17 +16,6 @@ apt update
 apt install -y psmisc
 fuser -k 8188/tcp 2>/dev/null || true
 
-# Restore persisted ComfyUI settings from network volume
-COMFY_SETTINGS_DIR="/workspace/runpod-slim/ComfyUI/user/default"
-PERSISTED_SETTINGS="/workspace/.comfy.settings.json"
-mkdir -p "$COMFY_SETTINGS_DIR"
-if [ -f "$PERSISTED_SETTINGS" ]; then
-    cp "$PERSISTED_SETTINGS" "$COMFY_SETTINGS_DIR/comfy.settings.json"
-    echo "Restored ComfyUI settings from $PERSISTED_SETTINGS"
-else
-    echo "No persisted ComfyUI settings found — using defaults"
-fi
-
 source /workspace/runpod-slim/ComfyUI/.venv-cu128/bin/activate
 cd /workspace/runpod-slim/ComfyUI
 

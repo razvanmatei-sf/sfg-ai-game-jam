@@ -54,8 +54,33 @@ else
     echo "Created symlink: $COMFY_WORKFLOWS -> $WORKSPACE_WORKFLOWS"
 fi
 
+# Setup settings persistence
+# ComfyUI saves settings to user/default/comfy.settings.json
+# Symlink it to /workspace so it survives container restarts
+echo "Setting up settings persistence..."
+
+COMFY_SETTINGS_FILE="$COMFY_DIR/user/default/comfy.settings.json"
+PERSISTED_SETTINGS="/workspace/.comfy.settings.json"
+
+if [ -L "$COMFY_SETTINGS_FILE" ]; then
+    echo "Settings file is already a symlink, skipping"
+else
+    mkdir -p "$COMFY_DIR/user/default"
+    # Preserve existing settings if any
+    if [ -f "$COMFY_SETTINGS_FILE" ] && [ ! -f "$PERSISTED_SETTINGS" ]; then
+        mv "$COMFY_SETTINGS_FILE" "$PERSISTED_SETTINGS"
+    else
+        rm -f "$COMFY_SETTINGS_FILE"
+    fi
+    # Create persistent file if it doesn't exist yet
+    [ ! -f "$PERSISTED_SETTINGS" ] && echo '{}' > "$PERSISTED_SETTINGS"
+    ln -s "$PERSISTED_SETTINGS" "$COMFY_SETTINGS_FILE"
+    echo "Created symlink: $COMFY_SETTINGS_FILE -> $PERSISTED_SETTINGS"
+fi
+
 echo "Folder structure setup complete"
 echo "  /workspace/models -> /workspace/ComfyUI/models"
 echo "  /workspace/outputs -> /workspace/ComfyUI/output"
 echo "  /workspace/inputs -> /workspace/ComfyUI/input"
 echo "  /workspace/workflows -> /workspace/ComfyUI/user/default/workflows"
+echo "  /workspace/.comfy.settings.json -> ComfyUI settings (persistent)"

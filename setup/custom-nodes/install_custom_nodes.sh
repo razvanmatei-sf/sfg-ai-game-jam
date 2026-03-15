@@ -1,6 +1,6 @@
 #!/bin/bash
 # ABOUTME: Installs custom nodes from nodes.txt configuration file.
-# ABOUTME: Clones repos and installs their requirements using uv pip.
+# ABOUTME: Clones repos and installs their requirements using pip.
 
 set -e
 
@@ -16,7 +16,6 @@ if [ ! -d "/workspace/ComfyUI" ]; then
 fi
 
 source /workspace/runpod-slim/ComfyUI/.venv-cu128/bin/activate
-pip install uv 2>/dev/null || true
 mkdir -p "$CUSTOM_NODES_DIR"
 cd "$CUSTOM_NODES_DIR"
 
@@ -35,7 +34,7 @@ while read -r repo_url || [ -n "$repo_url" ]; do
     git clone "$repo_url"
 
     cd "$node_path"
-    [ -f "requirements.txt" ] && uv pip install -r requirements.txt
+    [ -f "requirements.txt" ] && pip install -r requirements.txt
     [ -f "install.py" ] && python install.py
     [ -f "install.sh" ] && bash install.sh
     cd "$CUSTOM_NODES_DIR"

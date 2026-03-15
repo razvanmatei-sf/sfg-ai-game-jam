@@ -4248,11 +4248,9 @@ def set_artist():
         data = request.get_json()
         artist = data.get("artist", "")
         password = data.get("password", "")
-        autostart_comfyui = data.get("autostart_comfyui", False)
     else:
         artist = request.form.get("artist", "")
         password = request.form.get("password", "")
-        autostart_comfyui = request.form.get("autostart_comfyui") == "on"
 
     # Validate password
     expected = PASSWORDS.get(artist, "")
@@ -4268,16 +4266,6 @@ def set_artist():
     # Reset admin mode if not an admin
     if not is_admin(current_artist):
         admin_mode = False
-
-    # Auto-start ComfyUI if requested
-    if autostart_comfyui and current_artist:
-        # Start ComfyUI in background thread to not block the redirect
-        def start_comfyui_background():
-            start_session_internal("comfy-ui", current_artist)
-
-        thread = threading.Thread(target=start_comfyui_background)
-        thread.daemon = True
-        thread.start()
 
     # If form submission, redirect to home
     if not request.is_json:
@@ -4666,9 +4654,11 @@ def tool_status(tool_id):
     is_running = tool_id in active_sessions
 
     # Also check if port is actually responding (service is ready)
-    port_ready = False
-    if is_running and tool.get("port"):
-        port_ready = check_port_open(tool["port"])
+    port_ready = check_port_open(tool["port"]) if tool.get("port") else False
+
+    # ComfyUI runs from the Docker image — detect it via port even if not in active_sessions
+    if not is_running and port_ready:
+        is_running = True
 
     # Determine status string for frontend
     if is_running:

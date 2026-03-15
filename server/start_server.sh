@@ -12,6 +12,18 @@ find "$REPO_DIR/setup" -name "*.sh" -exec chmod +x {} \; 2>/dev/null
 # Symlink so server.py paths (/workspace/ComfyUI) resolve to the 5090 location
 ln -sfn /workspace/runpod-slim/ComfyUI /workspace/ComfyUI 2>/dev/null
 
+# Persist ComfyUI settings across container restarts
+COMFY_SETTINGS="/workspace/ComfyUI/user/default/comfy.settings.json"
+PERSISTED_SETTINGS="/workspace/.comfy.settings.json"
+if [ ! -L "$COMFY_SETTINGS" ]; then
+    mkdir -p "$(dirname "$COMFY_SETTINGS")"
+    [ -f "$COMFY_SETTINGS" ] && [ ! -f "$PERSISTED_SETTINGS" ] && mv "$COMFY_SETTINGS" "$PERSISTED_SETTINGS"
+    rm -f "$COMFY_SETTINGS"
+    [ ! -f "$PERSISTED_SETTINGS" ] && echo '{}' > "$PERSISTED_SETTINGS"
+    ln -s "$PERSISTED_SETTINGS" "$COMFY_SETTINGS"
+    echo "Symlinked ComfyUI settings to persistent storage"
+fi
+
 # Initialize passwords file on network volume (creates only if missing)
 bash "$REPO_DIR/setup/init_passwords.sh"
 

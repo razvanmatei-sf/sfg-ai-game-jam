@@ -1,11 +1,8 @@
 #!/bin/bash
 # ABOUTME: Installs ComfyUI with PyTorch 2.9.1, CUDA 13.0, and essential custom nodes.
-# ABOUTME: Uses uv for fast package installation. Calls setup_comfy_folders.sh at the end.
+# ABOUTME: Calls setup_comfy_folders.sh at the end.
 
 set -e
-
-export UV_SKIP_WHEEL_FILENAME_CHECK=1
-export UV_LINK_MODE=copy
 
 echo "Installing ComfyUI..."
 
@@ -60,9 +57,7 @@ source venv/bin/activate
 
 python3 -m pip install --upgrade pip
 
-pip install uv
-
-uv pip install torch==2.9.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu130
+pip install torch==2.9.1 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu130
 
 cd custom_nodes
 
@@ -83,7 +78,7 @@ cd ComfyUI-Manager
 git stash
 git reset --hard
 git pull --force
-uv pip install -r requirements.txt
+pip install -r requirements.txt
 cd ..
 
 # Setup ComfyUI-GGUF
@@ -91,7 +86,7 @@ cd ComfyUI-GGUF
 git stash
 git reset --hard
 git pull --force
-uv pip install -r requirements.txt
+pip install -r requirements.txt
 cd ..
 
 # Setup rgthree-comfy
@@ -99,7 +94,7 @@ cd rgthree-comfy
 git stash
 git reset --hard
 git pull --force
-[ -f "requirements.txt" ] && uv pip install -r requirements.txt
+[ -f "requirements.txt" ] && pip install -r requirements.txt
 cd ..
 
 # Setup ComfyUI-QuantOps
@@ -121,7 +116,7 @@ cd RES4LYF
 git stash
 git reset --hard
 git pull --force
-uv pip install -r requirements.txt
+pip install -r requirements.txt
 cd ..
 
 # Install SwarmUI ExtraNodes
@@ -145,17 +140,17 @@ cd ..
 
 echo "Installing ComfyUI requirements..."
 
-uv pip install -r requirements.txt
-uv pip install -r /workspace/sfg-ai-game-jam/setup/comfy/requirements.txt
+pip install -r requirements.txt
+pip install -r /workspace/sfg-ai-game-jam/setup/comfy/requirements.txt
 
 pip uninstall xformers -y
 
-uv pip install https://huggingface.co/MonsterMMORPG/Wan_GGUF/resolve/main/flash_attn-2.8.3+torch2.9.1.cuda13.1-cp310-cp310-linux_x86_64.whl
-uv pip install https://huggingface.co/MonsterMMORPG/Wan_GGUF/resolve/main/xformers-0.0.34+41531cee.d20260109-cp39-abi3-linux_x86_64.whl
-uv pip install https://huggingface.co/MonsterMMORPG/Wan_GGUF/resolve/main/sageattention-2.2.0+torch2.9.1.cuda13.1-cp39-abi3-linux_x86_64.whl
-uv pip install https://huggingface.co/MonsterMMORPG/Wan_GGUF/resolve/main/insightface-0.7.3-cp310-cp310-linux_x86_64.whl
+pip install https://huggingface.co/MonsterMMORPG/Wan_GGUF/resolve/main/flash_attn-2.8.3+torch2.9.1.cuda13.1-cp310-cp310-linux_x86_64.whl
+pip install https://huggingface.co/MonsterMMORPG/Wan_GGUF/resolve/main/xformers-0.0.34+41531cee.d20260109-cp39-abi3-linux_x86_64.whl
+pip install https://huggingface.co/MonsterMMORPG/Wan_GGUF/resolve/main/sageattention-2.2.0+torch2.9.1.cuda13.1-cp39-abi3-linux_x86_64.whl
+pip install https://huggingface.co/MonsterMMORPG/Wan_GGUF/resolve/main/insightface-0.7.3-cp310-cp310-linux_x86_64.whl
 
-uv pip install deepspeed
+pip install deepspeed
 
 apt update
 apt install -y psmisc
