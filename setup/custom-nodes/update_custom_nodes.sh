@@ -16,8 +16,6 @@ if [ ! -d "/workspace/ComfyUI" ]; then
 fi
 
 source /workspace/runpod-slim/ComfyUI/.venv-cu128/bin/activate
-pip install uv 2>/dev/null || true
-
 while read -r repo_url || [ -n "$repo_url" ]; do
     [[ "$repo_url" =~ ^#.*$ ]] || [ -z "$repo_url" ] && continue
 
@@ -34,7 +32,7 @@ while read -r repo_url || [ -n "$repo_url" ]; do
     git stash
     git pull --force
 
-    [ -f "requirements.txt" ] && uv pip install -r requirements.txt
+    [ -f "requirements.txt" ] && pip install -r requirements.txt
     [ -f "install.py" ] && python install.py
     [ -f "install.sh" ] && bash install.sh
 
