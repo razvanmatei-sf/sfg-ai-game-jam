@@ -4264,6 +4264,9 @@ def set_artist():
 
     current_artist = artist
 
+    # Reload users from disk so admin status is always fresh
+    reload_users()
+
     # Reset admin mode if not an admin
     if not is_admin(current_artist):
         admin_mode = False
