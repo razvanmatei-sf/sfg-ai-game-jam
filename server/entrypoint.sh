@@ -9,19 +9,13 @@ REPO_DIR="$WORKSPACE_DIR/sfg-ai-game-jam"
 BRANCH="main"
 PERSISTENT_WORKFLOWS="$WORKSPACE_DIR/workflows"
 
-# Preserve workflows on network volume BEFORE git touches them
-# If the repo has a real workflows dir (not a symlink), back it up first
-if [ -d "$REPO_DIR/workflows" ] && [ ! -L "$REPO_DIR/workflows" ]; then
-    mkdir -p "$PERSISTENT_WORKFLOWS"
-    cp -rn "$REPO_DIR/workflows"/. "$PERSISTENT_WORKFLOWS"/ 2>/dev/null || true
-    echo "Backed up workflows to persistent storage"
-fi
+# Ensure persistent workflows dir exists
+mkdir -p "$PERSISTENT_WORKFLOWS"
 
 # Clone or update the repository
 echo "Syncing repository..."
 if [ -d "$REPO_DIR/.git" ]; then
     cd "$REPO_DIR"
-    # Tell git to ignore workflows/ so reset doesn't touch it
     git fetch --all || echo "Warning: git fetch failed"
     git checkout "$BRANCH" 2>/dev/null || git checkout -b "$BRANCH" "origin/$BRANCH" || echo "Warning: checkout failed"
     git reset --hard "origin/$BRANCH" || echo "Warning: reset failed"
@@ -31,13 +25,9 @@ else
     git clone -b "$BRANCH" "$REPO_URL" "$REPO_DIR" || echo "Warning: clone failed"
 fi
 
-# Always replace repo workflows/ with symlink to persistent storage
-mkdir -p "$PERSISTENT_WORKFLOWS"
-# Seed persistent dir with any new repo workflows (won't overwrite existing)
-if [ -d "$REPO_DIR/workflows" ] && [ ! -L "$REPO_DIR/workflows" ]; then
-    cp -rn "$REPO_DIR/workflows"/. "$PERSISTENT_WORKFLOWS"/ 2>/dev/null || true
-    rm -rf "$REPO_DIR/workflows"
-fi
+# Replace repo workflows/ with symlink to persistent network volume.
+# Workflows live ONLY on the network volume — git repo copies are discarded.
+rm -rf "$REPO_DIR/workflows"
 ln -sfn "$PERSISTENT_WORKFLOWS" "$REPO_DIR/workflows"
 echo "Workflows symlinked to persistent storage at $PERSISTENT_WORKFLOWS"
 
