@@ -140,15 +140,18 @@ DEFAULT_TEAMS = [
 def initialize_users(json_path=DEFAULT_USERS_JSON, output_dir=DEFAULT_OUTPUT_DIR):
     """
     Initialize users system.
-    If JSON exists, load from it.
-    If not, create default teams.
+    Loads from JSON if it exists, then ensures all default teams are present.
     Always ensures Razvan Matei exists.
     Returns tuple: (users_list, admins_list)
     """
     users = load_users_from_file(json_path)
 
-    if not users:
-        users = list(DEFAULT_TEAMS)
+    # Always ensure default teams exist (merge, don't overwrite)
+    existing_names = {u["name"].strip().lower() for u in users}
+    for team in DEFAULT_TEAMS:
+        if team["name"].strip().lower() not in existing_names:
+            users.append(dict(team))
+            existing_names.add(team["name"].strip().lower())
 
     # Always ensure Razvan exists and is admin
     users = ensure_razvan_exists(users)
