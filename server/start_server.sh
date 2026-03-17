@@ -24,7 +24,19 @@ if [ ! -L "$COMFY_SETTINGS" ]; then
     echo "Symlinked ComfyUI settings to persistent storage"
 fi
 
-# Workflows persistence is handled in entrypoint.sh (before git reset)
+# Persist ComfyUI user workflows on network volume (shared across all pods)
+COMFY_WORKFLOWS="/workspace/ComfyUI/user/default/workflows"
+PERSISTED_COMFY_WORKFLOWS="/workspace/.comfy-workflows"
+if [ ! -L "$COMFY_WORKFLOWS" ]; then
+    mkdir -p "$PERSISTED_COMFY_WORKFLOWS"
+    # Back up any existing workflows before replacing
+    if [ -d "$COMFY_WORKFLOWS" ]; then
+        cp -rn "$COMFY_WORKFLOWS"/. "$PERSISTED_COMFY_WORKFLOWS"/ 2>/dev/null || true
+        rm -rf "$COMFY_WORKFLOWS"
+    fi
+    ln -sfn "$PERSISTED_COMFY_WORKFLOWS" "$COMFY_WORKFLOWS"
+    echo "Symlinked ComfyUI user workflows to persistent storage"
+fi
 
 # Initialize passwords file on network volume (creates only if missing)
 bash "$REPO_DIR/setup/init_passwords.sh"
