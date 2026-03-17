@@ -68,22 +68,6 @@ from user_management import (
 # Paths for user management
 USERS_JSON_PATH = "/workspace/users.json"
 USERS_OUTPUT_DIR = "/workspace/ComfyUI/output"
-PASSWORDS_FILE = "/workspace/.passwords.json"
-
-
-def load_passwords():
-    """Load passwords from hidden file on network volume."""
-    try:
-        if os.path.exists(PASSWORDS_FILE):
-            with open(PASSWORDS_FILE, "r") as f:
-                return json.load(f)
-    except Exception as e:
-        print(f"Warning: Could not load passwords from {PASSWORDS_FILE}: {e}")
-    return {}
-
-
-PASSWORDS = load_passwords()
-
 # Initialize users and admins from JSON/folders
 USERS_DATA, ADMINS = initialize_users(USERS_JSON_PATH, USERS_OUTPUT_DIR)
 
@@ -4236,10 +4220,8 @@ def set_artist():
     if request.is_json:
         data = request.get_json()
         artist = data.get("artist", "")
-        password = data.get("password", "")
     else:
         artist = request.form.get("artist", "")
-        password = request.form.get("password", "")
 
     current_artist = artist
 

@@ -38,9 +38,6 @@ if [ ! -L "$COMFY_WORKFLOWS" ]; then
     echo "Symlinked ComfyUI user workflows to persistent storage"
 fi
 
-# Initialize passwords file on network volume (creates only if missing)
-bash "$REPO_DIR/setup/init_passwords.sh"
-
 # Symlink repo server files over image copies so the server always runs latest code
 echo "Linking server files from repo..."
 ln -sfn "$REPO_DIR/server/server.py" /usr/local/bin/server.py
