@@ -16,12 +16,8 @@ mkdir -p "$PERSISTENT_WORKFLOWS"
 echo "Syncing repository..."
 if [ -d "$REPO_DIR/.git" ]; then
     cd "$REPO_DIR"
-    git fetch --all || echo "Warning: git fetch failed"
-    git checkout "$BRANCH" 2>/dev/null || git checkout -b "$BRANCH" "origin/$BRANCH" || echo "Warning: checkout failed"
-    git reset --hard "origin/$BRANCH" || echo "Warning: reset failed"
     git pull origin "$BRANCH" || echo "Warning: pull failed"
 else
-    rm -rf "$REPO_DIR"
     git clone -b "$BRANCH" "$REPO_URL" "$REPO_DIR" || echo "Warning: clone failed"
 fi
 
