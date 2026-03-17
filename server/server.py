@@ -3169,27 +3169,33 @@ def get_recent_output_images(user, limit=5):
     return images[:limit]
 
 
+def is_superadmin(user):
+    """Check if user is the superadmin (Razvan Matei)."""
+    if not user:
+        return False
+    return user.strip().lower() == SUPERADMIN_NAME.lower()
+
+
 def get_user_allowed_roots(user):
     """Get the allowed root paths for a user's assets.
-    Admins get full workspace access, regular users get their personal folders."""
+    Superadmin gets full workspace access, everyone else gets their output folder."""
     # user can be a string (artist name) or None
     username = user if isinstance(user, str) else ""
 
-    # Admins get access to entire workspace
-    if is_admin(username):
+    # Only superadmin gets full workspace access
+    if is_superadmin(username):
         return [""]  # Empty string = workspace root
 
     return [
         f"ComfyUI/output/{username}",
-        f"ComfyUI/input/{username}",
     ]
 
 
 def is_path_allowed(path, user):
     """Check if the given path is within the user's allowed directories.
-    Admins can access any path under /workspace."""
-    # Admins have full access
-    if is_admin(user):
+    Superadmin can access any path under /workspace."""
+    # Superadmin has full access
+    if is_superadmin(user):
         # Still prevent path traversal attacks
         normalized = os.path.normpath(path).lstrip("/")
         # Block any path that tries to escape workspace
@@ -3240,55 +3246,37 @@ def format_file_size(size_bytes):
 @app.route("/assets/")
 def assets():
     """Assets landing page - show user's root folders.
-    Admins see all workspace folders, regular users see their personal folders."""
+    Superadmin sees all workspace folders, teams go straight to their output folder."""
     if not current_artist:
         return redirect(url_for("login"))
 
-    folders = []
     user_is_admin = is_admin(current_artist)
 
-    if user_is_admin:
-        # Admins see all top-level folders in /workspace
-        try:
-            for name in os.listdir(WORKSPACE_ROOT):
-                if name.startswith("."):
-                    continue
-                item_path = os.path.join(WORKSPACE_ROOT, name)
-                if os.path.isdir(item_path):
-                    folders.append(
-                        {
-                            "name": name,
-                            "path": name,
-                            "type": "folder",
-                        }
-                    )
-            folders.sort(key=lambda x: x["name"].lower())
-        except PermissionError:
-            pass
-    else:
-        # Regular users see their personal folders
-        allowed_roots = get_user_allowed_roots(current_artist)
-        for root in allowed_roots:
-            full_path = os.path.join(WORKSPACE_ROOT, root)
-            # Create directory if it doesn't exist
-            if not os.path.exists(full_path):
-                os.makedirs(full_path, exist_ok=True)
+    # Non-superadmin users go straight to their output folder
+    if not is_superadmin(current_artist):
+        team_output = f"ComfyUI/output/{current_artist}"
+        full_path = os.path.join(WORKSPACE_ROOT, team_output)
+        os.makedirs(full_path, exist_ok=True)
+        return redirect(url_for("assets_browse", subpath=team_output))
 
-            # Determine folder display name
-            if "output" in root:
-                display_name = "My Outputs"
-                folder_type = "output"
-            else:
-                display_name = "My Inputs"
-                folder_type = "input"
-
-            folders.append(
-                {
-                    "name": display_name,
-                    "path": root,
-                    "type": folder_type,
-                }
-            )
+    # Superadmin sees all top-level folders in /workspace
+    folders = []
+    try:
+        for name in os.listdir(WORKSPACE_ROOT):
+            if name.startswith("."):
+                continue
+            item_path = os.path.join(WORKSPACE_ROOT, name)
+            if os.path.isdir(item_path):
+                folders.append(
+                    {
+                        "name": name,
+                        "path": name,
+                        "type": "folder",
+                    }
+                )
+        folders.sort(key=lambda x: x["name"].lower())
+    except PermissionError:
+        pass
 
     return render_template(
         "assets.html",
@@ -3303,18 +3291,18 @@ def assets():
         breadcrumb=[],
         parent_path="",
         is_root=True,
-        is_admin_view=user_is_admin,
+        is_admin_view=True,
     )
 
 
 @app.route("/assets/browse/<path:subpath>")
 def assets_browse(subpath):
     """Browse a specific directory.
-    Admins can browse any folder, regular users only their personal folders."""
+    Superadmin can browse any folder, teams only their output folder."""
     if not current_artist:
         return redirect(url_for("login"))
 
-    user_is_admin = is_admin(current_artist)
+    user_is_admin = is_superadmin(current_artist)
 
     # Security check
     if not is_path_allowed(subpath, current_artist):
@@ -3642,11 +3630,11 @@ def assets_delete_folder(folderpath):
 @app.route("/assets/api/list")
 def assets_api_list(subpath=""):
     """API endpoint to list directory contents as JSON.
-    Admins see all workspace folders, regular users see their personal folders."""
+    Superadmin sees all workspace folders, teams see their output folder."""
     if not current_artist:
         return jsonify({"error": "Not authenticated"}), 401
 
-    user_is_admin = is_admin(current_artist)
+    user_is_admin = is_superadmin(current_artist)
 
     # Handle root listing
     if not subpath:
