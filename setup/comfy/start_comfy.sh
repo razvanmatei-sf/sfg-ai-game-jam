@@ -1,20 +1,11 @@
 #!/bin/bash
 
-# Setup SSH keys from persistent storage (for private repo access)
-mkdir -p ~/.ssh
-if [ -d "/workspace/.ssh" ]; then
-    cp -r /workspace/.ssh/* ~/.ssh/ 2>/dev/null || true
-    chmod 600 ~/.ssh/id_* 2>/dev/null || true
-fi
-ssh-keyscan -t rsa github.com >> ~/.ssh/known_hosts 2>/dev/null
+# Install psmisc (for fuser) if not already present
+command -v fuser >/dev/null 2>&1 || { apt update && apt install -y psmisc; }
 
-# Sync workflows from private repo
-cd /workspace/runpod-slim/ComfyUI/user/default/workflows
-git pull
-
-apt update
-apt install -y psmisc
+# Kill any existing ComfyUI on port 8188
 fuser -k 8188/tcp 2>/dev/null || true
+sleep 2
 
 source /workspace/runpod-slim/ComfyUI/.venv-cu128/bin/activate
 cd /workspace/runpod-slim/ComfyUI

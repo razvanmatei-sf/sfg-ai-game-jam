@@ -4271,6 +4271,13 @@ def set_artist():
     if not is_admin(current_artist):
         admin_mode = False
 
+    # Restart ComfyUI with this team's output directory
+    threading.Thread(
+        target=start_session_internal,
+        args=("comfy-ui", artist),
+        daemon=True,
+    ).start()
+
     # If form submission, redirect to home
     if not request.is_json:
         return redirect(url_for("home"))
