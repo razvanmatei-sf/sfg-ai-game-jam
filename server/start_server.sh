@@ -24,6 +24,20 @@ if [ ! -L "$COMFY_SETTINGS" ]; then
     echo "Symlinked ComfyUI settings to persistent storage"
 fi
 
+# Persist workflows on network volume so git reset doesn't wipe them
+PERSISTENT_WORKFLOWS="$WORKSPACE_DIR/workflows"
+REPO_WORKFLOWS="$REPO_DIR/workflows"
+if [ ! -L "$REPO_WORKFLOWS" ]; then
+    mkdir -p "$PERSISTENT_WORKFLOWS"
+    # Seed persistent dir with repo workflows (won't overwrite existing)
+    if [ -d "$REPO_WORKFLOWS" ]; then
+        cp -rn "$REPO_WORKFLOWS"/. "$PERSISTENT_WORKFLOWS"/ 2>/dev/null || true
+        rm -rf "$REPO_WORKFLOWS"
+    fi
+    ln -sfn "$PERSISTENT_WORKFLOWS" "$REPO_WORKFLOWS"
+    echo "Symlinked workflows to persistent storage at $PERSISTENT_WORKFLOWS"
+fi
+
 # Initialize passwords file on network volume (creates only if missing)
 bash "$REPO_DIR/setup/init_passwords.sh"
 
