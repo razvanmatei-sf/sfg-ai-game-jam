@@ -48,18 +48,14 @@ ln -sfn "$REPO_DIR/server/static" /usr/local/bin/static
 # Export repo path for the Flask server
 export REPO_DIR="$REPO_DIR"
 
-# Run the original 5090 start script in the background
-# (starts SSH, FileBrowser, Jupyter, ComfyUI setup, etc.)
-/start.sh &
+# Start only the services we need — NOT /start.sh which modifies ComfyUI on the network volume
+echo "Starting SSH..."
+service ssh start 2>/dev/null || /usr/sbin/sshd 2>/dev/null || true
 
-# Wait for base services to initialize
-echo "Waiting for base services to initialize..."
-sleep 10
-
-# Kill ComfyUI that the base image started — we control ComfyUI via team login
-echo "Killing base image ComfyUI (teams start their own on login)..."
-pkill -9 -f "ComfyUI/main.py" 2>/dev/null || true
-fuser -k -9 8188/tcp 2>/dev/null || true
+echo "Starting FileBrowser..."
+if command -v filebrowser &>/dev/null; then
+    filebrowser -r /workspace -p 8080 -a 0.0.0.0 --noauth &>/dev/null &
+fi
 
 # Start Flask server on port 8090 (foreground, keeps container alive)
 echo "Starting SF AI Game Jam server on port 8090..."
